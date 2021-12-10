@@ -126,6 +126,7 @@ type ConfigPayload struct {
 	CustomDNSSupported bool `json:"custom_dns_supported"`
 	HubServerAddr      string
 	DeployClusterID    string
+	AesKey             string `json:"aes_key"`
 
 	RepoConfigs map[string]*RegistryNamespace
 
@@ -139,6 +140,7 @@ type ConfigPayload struct {
 
 	// RegistryID is the id of product registry
 	RegistryID string `json:"registry_id"`
+	K8SClusters        []*K8SClusterResp  `json:"k8s_clusters"`
 }
 
 type AslanConfig struct {

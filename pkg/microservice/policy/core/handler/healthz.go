@@ -14,10 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package version
+package handler
 
-var (
-	Version     = "1.7.1"
-	BuildNumber = "0"
-	GitCommit   = ""
+import (
+	"github.com/gin-gonic/gin"
+
+	"github.com/koderover/zadig/pkg/microservice/policy/core"
+	internalhandler "github.com/koderover/zadig/pkg/shared/handler"
 )
+
+func Healthz(c *gin.Context) {
+	ctx := internalhandler.NewContext(c)
+	defer func() { internalhandler.JSONResponse(c, ctx) }()
+	ctx.Err = core.Healthz(c.Request.Context())
+}

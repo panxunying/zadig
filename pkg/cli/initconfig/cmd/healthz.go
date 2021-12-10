@@ -14,10 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package version
+package cmd
 
-var (
-	Version     = "1.7.1"
-	BuildNumber = "0"
-	GitCommit   = ""
+import (
+	"fmt"
+
+	"github.com/koderover/zadig/pkg/shared/client/policy"
+	"github.com/koderover/zadig/pkg/shared/client/user"
 )
+
+func Healthz() error {
+	if err := checkUserServiceHealth(); err != nil {
+		return fmt.Errorf("checkUserServiceHealth error:%s", err)
+	}
+	if err := checkPolicyServiceHealth(); err != nil {
+		return fmt.Errorf("checkPolicyServiceHealth error:%s", err)
+	}
+	return nil
+}
+
+func checkUserServiceHealth() error {
+	return user.New().Healthz()
+}
+
+func checkPolicyServiceHealth() error {
+	return policy.NewDefault().Healthz()
+}
