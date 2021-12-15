@@ -7,12 +7,11 @@ import (
 )
 
 func init() {
-	upgradepath.AddHandler(upgradepath.V170, upgradepath.V180, V17xToV180)
-	upgradepath.AddHandler(upgradepath.V171, upgradepath.V180, V17xToV180)
+	upgradepath.AddHandler(upgradepath.V171, upgradepath.V180, V171ToV180)
 }
 
-func V17xToV180() error {
-	log.Info("Migrating data from 1.7.0 to 1.8.0")
+func V171ToV180() error {
+	log.Info("Migrating data from 1.7.1 to 1.8.0")
 
 	log.Info("Start to patchProductRegistryID")
 	err := patchProductRegistryID()
