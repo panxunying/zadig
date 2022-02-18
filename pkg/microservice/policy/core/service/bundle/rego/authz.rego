@@ -27,10 +27,14 @@ response = r {
 response = r {
     allow
     roles := all_roles
+    policy_rule := user_matched_policy_rule
+    role_rule := user_matched_role_rule
+    rule := policy_rule | role_rule
     r := {
       "allowed": true,
       "headers": {
-        "Roles": json.marshal(roles),
+        "Resources": "*",
+        "Rules": json.marshal(rule)
       }
     }
 }
@@ -51,7 +55,6 @@ response = r {
       "allowed": true,
       "headers": {
         "Resources": json.marshal(resource),
-        "Roles": json.marshal(roles),
         "Rules": json.marshal(rule)
       }
     }
@@ -181,16 +184,18 @@ project_name_is_match(res) {
 user_matched_policy_rule[rule] {
     some rule
 
-    allowed_policy_attributive_rules[rule]
+    allowed_policy_rules[rule]
 
     glob.match(trim(rule.endpoint, "/"), ["/"], concat("/", input.parsed_path))
 
 }
 
+
+
 user_matched_role_rule[rule] {
     some rule
 
-    allowed_role_attributive_rules[rule]
+    allowed_role_rules[rule]
 
     glob.match(trim(rule.endpoint, "/"), ["/"], concat("/", input.parsed_path))
 
@@ -226,19 +231,6 @@ all_attributes_match(attributes, resourceType, resourceID) {
 attributes_match(attributes, res) {
     attribute := attributes[_]
     attribute_match(attribute, res)
-}
-
-attributes_mismatch(attributes, res) {
-    attribute := attributes[_]
-    attribute_mismatch(attribute, res)
-}
-
-attribute_mismatch(attribute, res) {
-    res.spec[attribute.key] != attribute.value
-}
-
-attribute_mismatch(attribute, res) {
-    not res.spec[attribute.key]
 }
 
 get_resource_id(idRegex) = id {
