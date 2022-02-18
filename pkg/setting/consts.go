@@ -576,6 +576,7 @@ const (
 	StatusSubresource  = "status"
 	IngressSubresource = "ingress"
 	ResourcesHeader    = "Resources"
+	RulesHeader        = "Rules"
 )
 
 type K8SClusterStatus string

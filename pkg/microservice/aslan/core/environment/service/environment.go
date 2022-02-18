@@ -172,7 +172,7 @@ type RawYamlResp struct {
 
 type intervalExecutorHandler func(data *commonmodels.Service, isRetry bool, log *zap.SugaredLogger) error
 
-func ListProducts(projectName string, envNames []string, log *zap.SugaredLogger) ([]*EnvResp, error) {
+func ListProducts(projectName string, envNames []string, resourceVerbs map[string]sets.String, log *zap.SugaredLogger) ([]*EnvResp, error) {
 	envs, err := commonrepo.NewProductColl().List(&commonrepo.ProductListOptions{Name: projectName, InEnvs: envNames, IsSortByProductName: true})
 	if err != nil {
 		log.Errorf("Failed to list envs, err: %s", err)

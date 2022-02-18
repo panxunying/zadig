@@ -67,13 +67,13 @@ func ListProducts(c *gin.Context) {
 		return
 	}
 
-	envNames, found := internalhandler.GetResourcesInHeader(c)
+	envNames, resourceVerbs, found := internalhandler.GetResourcesInHeader(c)
 	if found && len(envNames) == 0 {
 		ctx.Resp = []*service.ProductResp{}
 		return
 	}
 
-	ctx.Resp, ctx.Err = service.ListProducts(projectName, envNames, ctx.Logger)
+	ctx.Resp, ctx.Err = service.ListProducts(projectName, envNames, resourceVerbs, ctx.Logger)
 }
 
 func UpdateMultiProducts(c *gin.Context) {
@@ -94,7 +94,7 @@ func UpdateMultiProducts(c *gin.Context) {
 		log.Errorf("UpdateMultiProducts json.Unmarshal err : %v", err)
 	}
 
-	allowedEnvs, found := internalhandler.GetResourcesInHeader(c)
+	allowedEnvs, resourceVerbs, found := internalhandler.GetResourcesInHeader(c)
 	if found {
 		allowedSet := sets.NewString(allowedEnvs...)
 		currentSet := sets.NewString(args.EnvNames...)

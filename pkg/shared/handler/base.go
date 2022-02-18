@@ -27,7 +27,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/util/sets"
 
+	"github.com/koderover/zadig/pkg/microservice/aslan/core/label/repository/mongodb"
+	"github.com/koderover/zadig/pkg/microservice/aslan/core/label/service"
 	systemmodels "github.com/koderover/zadig/pkg/microservice/aslan/core/system/repository/models"
 	systemservice "github.com/koderover/zadig/pkg/microservice/aslan/core/system/service"
 	"github.com/koderover/zadig/pkg/setting"
@@ -84,22 +87,96 @@ func NewContext(c *gin.Context) *Context {
 	}
 }
 
-func GetResourcesInHeader(c *gin.Context) ([]string, bool) {
+type Rule struct {
+	Endpoint        string      `json:"endpoint"`
+	MatchAttributes []Attribute `json:"matchAttributes"`
+	Method          string      `json:"method"`
+	ResourceType    string      `json:"resourceType"`
+}
+
+type Attribute struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+func buildLabel(key, value string) string {
+	return key + "&&" + value
+}
+func buildResource(projectName, projectType, name string) string {
+	return projectName + "&&" + projectType + "&&" + name
+}
+func GetResourcesInHeader(c *gin.Context) ([]string, map[string]sets.String, bool) {
+	ctx := NewContext(c)
+	defer func() { JSONResponse(c, ctx) }()
 	_, ok := c.Request.Header[setting.ResourcesHeader]
 	if !ok {
-		return nil, false
+		return nil, nil, false
 	}
-
+	_, ok = c.Request.Header[setting.RulesHeader]
+	if !ok {
+		return nil, nil, false
+	}
 	res := c.GetHeader(setting.ResourcesHeader)
 	if res == "" {
-		return nil, true
+		return nil, nil, true
+	}
+	ruleRes := c.GetHeader(setting.RulesHeader)
+	if ruleRes == "" {
+		return nil, nil, true
 	}
 	var resources []string
 	if err := json.Unmarshal([]byte(res), &resources); err != nil {
-		return nil, false
+		return nil, nil, false
+	}
+	var rules []Rule
+	if err := json.Unmarshal([]byte(ruleRes), &rules); err != nil {
+		return nil, nil, false
+	}
+	resourceVerbs := make(map[string]sets.String)
+	verbSet := sets.String{}
+	labelSet := sets.String{}
+	var labels []mongodb.Label
+	for _, rule := range rules {
+		if rule.MatchAttributes == nil {
+			verbSet.Insert(rule.Method)
+		}
+		for _, attribute := range rule.MatchAttributes {
+			if !labelSet.Has(buildLabel(attribute.Key, attribute.Value)) {
+				labelSet.Insert(buildLabel(attribute.Key, attribute.Value))
+				labels = append(labels, mongodb.Label{
+					Key:   attribute.Key,
+					Value: attribute.Value,
+				})
+			}
+		}
+	}
+	resp, err := service.ListResourcesByLabels(labels, ctx.Logger)
+	if err != nil {
+		return nil, nil, false
+	}
+	for _, rule := range rules {
+		for _, attribute := range rule.MatchAttributes {
+			if labelResources, rOK := resp.Resources[buildLabel(attribute.Key, attribute.Value)]; rOK {
+				for _, resource := range labelResources {
+					resourceKey := buildResource(resource.ProjectName, resource.Type, resource.Name)
+					if labelsValue, lOK := resourceVerbs[resourceKey]; lOK {
+						labelsValue.Insert(rule.Method)
+						resourceVerbs[resourceKey] = labelsValue
+					} else {
+						resourceVerbs[resourceKey] = sets.NewString(rule.Method)
+					}
+				}
+
+			}
+		}
+	}
+	for _, verbs := range resourceVerbs {
+		for _, s := range verbSet.List() {
+			verbs.Insert(s)
+		}
 	}
 
-	return resources, true
+	return resources, resourceVerbs, true
 }
 
 func getUserFromJWT(token string) (jwtClaims, error) {
