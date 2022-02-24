@@ -34,5 +34,6 @@ func (*Router) Inject(router *gin.RouterGroup) {
 		collaborations.DELETE("/:name", middleware.UpdateOperationLogStatus, DeleteCollaborationMode)
 		collaborations.GET("/new", GetCollaborationNew)
 		collaborations.POST("/sync", SyncCollaborationInstance)
+		collaborations.POST("/clean", CleanCollaborationInstances)
 	}
 }

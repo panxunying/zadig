@@ -232,9 +232,9 @@ func DeleteLabels(ids []string, forceDelete bool, logger *zap.SugaredLogger) err
 	return mongodb.NewLabelColl().BulkDelete(ids)
 }
 
-func DeleteLabelsAndBindingsByProject(projectName string, logger *zap.SugaredLogger) error {
+func DeleteLabelsAndBindingsByProject(projectName, source string, logger *zap.SugaredLogger) error {
 
-	labels, err := mongodb.NewLabelColl().ListByProjectName(projectName)
+	labels, err := mongodb.NewLabelColl().ListByProjectNameAndSource(projectName, source)
 	if err != nil {
 		return err
 	}

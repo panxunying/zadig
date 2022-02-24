@@ -957,6 +957,19 @@ func SyncCollaborationInstance(products *SyncCollaborationInstanceArgs, projectN
 	return nil
 }
 
+func CleanCollaborationInstances(instances []models.CollaborationInstance) error {
+	for _, v := range instances {
+		for _, workflow := range v.Workflows {
+			commonrepo.NewWorkflowColl().Delete(workflow.Name)
+		}
+		for _, product := range v.Products {
+			commonrepo.NewProductColl().UpdateStatus(product.Name, v.ProjectName, setting.ProductStatusDeleting)
+		}
+	}
+
+	return nil
+}
+
 func getCollaborationDelete(updateResp *GetCollaborationUpdateResp) *GetCollaborationDeleteResp {
 	productSet := sets.String{}
 	workflowSet := sets.String{}
