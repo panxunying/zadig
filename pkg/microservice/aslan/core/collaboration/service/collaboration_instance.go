@@ -17,6 +17,7 @@ limitations under the License.
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"time"
@@ -840,6 +841,8 @@ func syncLabel(updateResp *GetCollaborationUpdateResp, projectName, identityType
 	}
 
 	if len(newBindings) > 0 {
+		cd, _ := json.Marshal(newBindings)
+		logger.Infof("start syncLabel CreateLabelbindings:%s user:%s", cd, userName)
 		err = service.CreateLabelBindings(&service.CreateLabelBindingsArgs{
 			LabelBindings: newBindings,
 		}, userName, logger)
@@ -849,7 +852,8 @@ func syncLabel(updateResp *GetCollaborationUpdateResp, projectName, identityType
 		}
 	}
 	if len(deleteBindings) > 0 {
-		logger.Infof("start syncLabel DeleteLabelBindings:%v user:%s", deleteBindings, userName)
+		jd, _ := json.Marshal(deleteBindings)
+		logger.Infof("start syncLabel DeleteLabelBindings:%s user:%s", jd, userName)
 		err = service.DeleteLabelBindings(&service.DeleteLabelBindingsArgs{
 			LabelBindings: deleteBindings,
 		}, userName, logger)
