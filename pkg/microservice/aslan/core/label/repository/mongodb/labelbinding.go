@@ -18,12 +18,14 @@ package mongodb
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 
 	"github.com/koderover/zadig/pkg/microservice/aslan/config"
 	"github.com/koderover/zadig/pkg/microservice/aslan/core/label/repository/models"
@@ -67,7 +69,9 @@ type LabelBinding struct {
 	CreateTime int64    `json:"create_time" bson:"create_time"`
 }
 
-func (c *LabelBindingColl) CreateMany(labelBindings []*LabelBinding) error {
+func (c *LabelBindingColl) CreateMany(labelBindings []*LabelBinding, userName string, logger *zap.SugaredLogger) error {
+	lbsj, _ := json.Marshal(labelBindings)
+	logger.Infof("labelbindings createMany:%s userName:%s", lbsj, userName)
 	if len(labelBindings) == 0 {
 		return nil
 	}
@@ -158,7 +162,8 @@ func (c *LabelBindingColl) BulkDeleteByLabelIds(labelIds []string) error {
 	return err
 }
 
-func (c *LabelBindingColl) BulkDeleteByIds(ids []string) error {
+func (c *LabelBindingColl) BulkDeleteByIds(ids []string, logger *zap.SugaredLogger) error {
+	logger.Infof("BulkDeleteByIds:%s", ids)
 	if len(ids) == 0 {
 		return nil
 	}
@@ -178,7 +183,9 @@ func (c *LabelBindingColl) BulkDeleteByIds(ids []string) error {
 	return err
 }
 
-func (c *LabelBindingColl) BulkDelete(labelBindings []*LabelBinding) error {
+func (c *LabelBindingColl) BulkDelete(labelBindings []*LabelBinding, logger *zap.SugaredLogger) error {
+	lbsj, _ := json.Marshal(labelBindings)
+	logger.Infof("BulkDelete:%s", lbsj)
 	if len(labelBindings) == 0 {
 		return nil
 	}

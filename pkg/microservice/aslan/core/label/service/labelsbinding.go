@@ -99,7 +99,7 @@ func CreateLabelBindings(cr *CreateLabelBindingsArgs, userName string, logger *z
 		}
 	}
 
-	return mongodb.NewLabelBindingColl().CreateMany(cr.LabelBindings)
+	return mongodb.NewLabelBindingColl().CreateMany(cr.LabelBindings, userName, logger)
 }
 
 type DeleteLabelBindingsArgs struct {
@@ -108,13 +108,13 @@ type DeleteLabelBindingsArgs struct {
 
 func DeleteLabelBindings(dr *DeleteLabelBindingsArgs, userName string, logger *zap.SugaredLogger) error {
 	logger.Infof("DeleteLabelBindings:%v userName:%s", dr, userName)
-	return mongodb.NewLabelBindingColl().BulkDelete(dr.LabelBindings)
+	return mongodb.NewLabelBindingColl().BulkDelete(dr.LabelBindings, logger)
 }
 
 type DeleteLabelsBindingsByIdsArgs struct {
 	IDs []string
 }
 
-func DeleteLabelsBindingsByIds(ids []string) error {
-	return mongodb.NewLabelBindingColl().BulkDeleteByIds(ids)
+func DeleteLabelsBindingsByIds(ids []string, logger *zap.SugaredLogger) error {
+	return mongodb.NewLabelBindingColl().BulkDeleteByIds(ids, logger)
 }

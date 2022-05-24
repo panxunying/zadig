@@ -17,6 +17,8 @@ limitations under the License.
 package handler
 
 import (
+	"encoding/json"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/koderover/zadig/pkg/microservice/aslan/core/label/repository/mongodb"
@@ -47,6 +49,8 @@ func CreateLabelBindings(c *gin.Context) {
 		ctx.Err = err
 		return
 	}
+	clba, _ := json.Marshal(createLabelBindingsArgs)
+	ctx.Logger.Infof("handler CreateLabelBindings: args:%s userName:%s", clba, ctx.UserName)
 	ctx.Err = service.CreateLabelBindings(createLabelBindingsArgs, ctx.UserName, ctx.Logger)
 }
 

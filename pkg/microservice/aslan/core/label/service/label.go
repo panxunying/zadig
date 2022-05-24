@@ -17,6 +17,7 @@ limitations under the License.
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"go.uber.org/zap"
@@ -237,8 +238,9 @@ func DeleteLabelsAndBindingsByProject(projectName string, logger *zap.SugaredLog
 	for _, labelBinding := range labelBindings {
 		labelBindingIDs = append(labelBindingIDs, labelBinding.ID.Hex())
 	}
-
-	if err := mongodb.NewLabelBindingColl().BulkDeleteByIds(labelBindingIDs); err != nil {
+	lbidsj, _ := json.Marshal(labelBindingIDs)
+	logger.Infof("DeleteLabelsAndBindingsByProject:%s, projectName:%s", lbidsj, projectName)
+	if err := mongodb.NewLabelBindingColl().BulkDeleteByIds(labelBindingIDs, logger); err != nil {
 		logger.Errorf("BulkDeleteByIds err :%s,ids:%v", err, labelBindingIDs)
 		return err
 	}
