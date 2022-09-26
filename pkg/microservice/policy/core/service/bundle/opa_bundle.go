@@ -282,6 +282,22 @@ func generateOPARoles(roles []*models.Role, policyMetas []*models.PolicyMeta) *o
 		opaRole := &role{Name: ro.Name, Namespace: ro.Namespace}
 		for resource, verbs := range resourceVerbs {
 			ruleList := resourceMappings.GetPolicyRules(resource, verbs.List(), verbAttrMap)
+			if ro.Name != "read-project-only" {
+				for _, rule := range ruleList {
+					if rule.ResourceType == "ProductionEnvironment" {
+						rule.MatchAttributes = append(rule.MatchAttributes, &Attribute{
+							Key:   "production",
+							Value: "true",
+						})
+					}
+					if rule.ResourceType == "Environment" {
+						rule.MatchAttributes = append(rule.MatchAttributes, &Attribute{
+							Key:   "production",
+							Value: "false",
+						})
+					}
+				}
+			}
 			opaRole.Rules = append(opaRole.Rules, ruleList...)
 		}
 		for _, r := range ro.Rules {
