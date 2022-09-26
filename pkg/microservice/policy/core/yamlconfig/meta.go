@@ -124,8 +124,8 @@ func processMetas(metas []*types.PolicyMeta) []*types.PolicyMeta {
 					if rule.Filter {
 						rule.MatchAttributes = []*types.Attribute{
 							{
-								Key:   "production",
-								Value: "false",
+								Key:   "placeholder",
+								Value: "placeholder",
 							},
 						}
 					}
@@ -137,8 +137,8 @@ func processMetas(metas []*types.PolicyMeta) []*types.PolicyMeta {
 						rule.IDRegex = idRegex
 						rule.MatchAttributes = []*types.Attribute{
 							{
-								Key:   "production",
-								Value: "false",
+								Key:   "placeholder",
+								Value: "placeholder",
 							},
 						}
 					}

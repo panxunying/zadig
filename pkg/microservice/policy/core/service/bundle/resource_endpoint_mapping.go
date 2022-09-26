@@ -17,11 +17,13 @@ limitations under the License.
 package bundle
 
 import (
+	"encoding/json"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/koderover/zadig/pkg/microservice/policy/core/repository/models"
+	"github.com/koderover/zadig/pkg/tool/log"
 )
 
 type resourceActionMappings map[string]map[string][]*Rule
@@ -111,6 +113,8 @@ func (m resourceActionMappings) GetPolicyRules(resource string, actions []string
 
 func getResourceActionMappings(isPolicy bool, policies []*models.PolicyMeta) resourceActionMappings {
 	data := make(resourceActionMappings)
+	plj, _ := json.Marshal(policies)
+	log.Infof("plj:%s", plj)
 	for _, p := range policies {
 		if _, ok := data[p.Resource]; !ok {
 			data[p.Resource] = make(map[string][]*Rule)
@@ -125,7 +129,21 @@ func getResourceActionMappings(isPolicy bool, policies []*models.PolicyMeta) res
 					}
 					as = append(as, &Attribute{Key: a.Key, Value: a.Value})
 				}
-
+				if !isPolicy {
+					if p.Resource == "ProductionEnvironment" {
+						as = append(as, &Attribute{
+							Key:   "production",
+							Value: "true",
+						})
+						log.Infof("ProductionEnvironment!!!!!!   ")
+					}
+					if p.Resource == "Environment" {
+						as = append(as, &Attribute{
+							Key:   "production",
+							Value: "false",
+						})
+					}
+				}
 				data[p.Resource][r.Action] = append(data[p.Resource][r.Action], &Rule{
 					Method:          ar.Method,
 					Endpoint:        ar.Endpoint,

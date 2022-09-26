@@ -29,6 +29,8 @@ metas:
             endpoint: /api/aslan/delivery/releases/helm
           - method: GET
             endpoint: /api/aslan/environment/environments
+            resourceType: Environment
+            filter: true
           - method: GET
             endpoint: /api/aslan/environment/environments/?*/helm/releases
           - method: GET
@@ -597,6 +599,8 @@ metas:
             endpoint: '/api/aslan/environment/environments/:name/helm/values'
           - method: GET
             endpoint: /api/aslan/environment/environments
+            resourceType: Environment
+            filter: true
           - method: GET
             endpoint: '/api/aslan/environment/environments/:name'
           - method: GET
